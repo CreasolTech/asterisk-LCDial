@@ -1,0 +1,10 @@
+Simple tool to merge justvoip rates with list of international prefix.
+
+The CSV file country_international_prefix.csv is taken from
+http://en.wikipedia.org/wiki/List_of_mobile_phone_codes_by_country 
+Please update it instead of modifying the CSV file, then
+1. select with mouse the content of the table
+2. paste into an openoffice spreedsheet
+3. save in CSV using semicolon (;) as separator, and disable double-quote (")
+
+

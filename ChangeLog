@@ -1,0 +1,118 @@
+LCDial - Least cost routing dial application for asterisk
+Written by Paolo Subiaco https://www.creasol.it
+Based on LCDial written by Wolfgang Pichler (wp@commoveo.com)
+
+
+Rev. 16.0 2019-02-03
+	Added support for Asterisk 16
+		- using ast_malloc() instead of malloc()
+		- using ast_free() instead of free()
+
+Rev. 14.0 2017-06-08
+	Added support for Asterisk 14
+
+772 
+	Added support for Asterisk 1.8
+
+771 -  (for asterisk 1.6)
+	If dialstatus == "BUSY" then will try the next trunk because
+	some ATAs returns BUSY instead of CONGESTION
+
+770 - 2009-12-21 (for asterisk 1.6)
+	Now it's possible to configure asterisk to route outgoing calls in different
+	ways through the first parameter passed to LCDial.
+	
+	NOTE: LCDial() is changed so a new argument is added (the first one). The
+	tables lcdial_providers and lcdial_rates remains the same of the previous
+	version!
+
+	Syntax: LCDial(path_number,called_number,dial_options)
+	LCDial(1,0123456789,30,m) route call through the providers where enable=1
+	LCDial(2,0123456789,30,m) route call through the providers where enable=2
+	
+	This feature is useful for PBX used by more than one company, so you can
+	define that users 11,12,13,14,15 calls through the providers where the
+	"enabled"	field (in providers table) is 1, while users 51,52,53,54 calls 
+	through the	providers where "enabled" field is 2.
+	This can be done for up to 10 routes, between 1 and 9.
+	If the first parameter is not specified, 1 is assumed.
+
+	Example: extensions.conf
+	; define which users uses the 2nd path
+	LCDIAL_PATH_2=51,52,53,54
+	;LCDIAL_PATH_3=61,62,63
+
+	[macro-LCDialSetPath]
+	; set the variable "LCDialPath" (first argument of LCDial) to select
+	; the path for the outgoing call
+	exten => s,1,Set(LCDialPath=1)
+	;exten => s,n,MacroExit
+	; select the path
+	exten => s,n,GotoIf($["a${LCDIAL_PATH_2}"="a"]?:20) 
+	; LCDIAL_PATH_2 exists:	check that the extension that originate the call is inside LCDIAL_PATH_2
+	exten => s,n,MacroExit
+	exten => s,20,GotoIf(${REGEX("${CALLERID(number)}" ${LCDIAL_PATH_2})}?:40)
+	exten => s,n,Set(LCDialPath=2)
+	exten => s,n,MacroExit
+	exten => s,20,GotoIf(${REGEX("${CALLERID(number)}" ${LCDIAL_PATH_3})}?:60)
+	exten => s,n,Set(LCDialPath=3)
+	exten => s,n,MacroExit
+	exten => 60,MacroExit
+
+	[trunknational]
+	; National context accessed through trunk
+	exten => _0ZXXX.,1,NoOp(National outcall)
+	exten => _0ZXXX.,n,Macro(LCDialSetPath)	; set the path to call to (enable=1	or enable=2 or...)
+	exten => _0ZXXX.,n,LCDial(${LCDialPath},${EXTEN},90)
+	exten => _0ZXXX.,n,Hangup
+
+769 - 2009-12-08 (for asterisk 1.6)
+	Only sample data was changed (lcdial_providers and lcdial_rates)
+
+768 - 2009-04-30 (for asterisk 1.6)
+	Information about selected provider (for outgoing calls) now are
+	written to the log system with NOTICE level instead of WARNING.
+
+	New table structure:
+	1. create new field "ratename" into lcdial_providers, to permit creating
+	more providers (each one with its dialstring) with the same tariff
+	2. create new field "ratemul" into lcdial_providers to assign a multiply
+	factor for the rates: this permit for two or more providers with the same
+	ratename to have a priority while selection
+	3. removed timeout in the dialstring
+
+	Also, created 2 scripts to import justvoip and eutelia rates automatically 
+
+767 - 2008-12-12
+	Some changes from Sebastian Gutierrez to port sources to asterisk 1.6
+
+766 - 2008-09-14
+	Added the 'U' option which permit to make only one attempt to call, using
+	the best provider.
+	Note: the 'U' character should be the first one, for example
+	LCDial(number|Um)
+	This options should not passed to the Dial() application, but will be filtered.
+
+
+765 - 2008-08-04
+	Revised several things to permit the clean compilation with asterisk 1.4.21
+	The functionality remains the same of the previous version.
+
+764 - 2006-11-03
+Few modifications by Paolo Subiaco (psubiaco@creasol.it):
+	* modified database structure: only two tables now are used, one to define
+		the list of providers (and corresponding dialstring and enable/disable
+		flag), and one with the list of prefix/rates associated to every provider
+
+	* prefix field is now a regular expression which permit to specify a group
+	of profixes (like ^00(39|43|34) or ^00393[23469]) but be careful about the
+	length of the prefix, used to see which rules match first
+
+	* the query specified in lcdial.conf file extract from the database the list
+	of providers (there can be more than one rule/provider) that match the
+	dialed number ordered by prefix length; then, the lcdial application will
+	take from this list only one rule/provider (the first one) and sort this
+	rules by rate to first call through the best rate provider, then the 2nd
+	one, and so on...
+
+763	- Original version by Wolfgang Pichler (wp@commoveo.com)
