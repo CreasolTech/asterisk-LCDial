@@ -36,7 +36,7 @@ Least Cost Routing/FailOver, specifying only the number to CALL and, optionally,
 the dial options separated by a ',', i.e.
 
 ```
-LCDial(043812345678,m)  ; dial 043812345678 with music until the 
+LCDial(043812345678,m)  ; dial 043812345678, trying with provider A, and if not work, with provider B, ... with music until the 
                         ; called party answer this call
 
 LCDial(043812345678,U)  ; this is a feature introduced at 2008-09-14 in LCDial:

@@ -255,6 +255,7 @@ static int lcdial_exec(struct ast_channel *chan, const char *data)
 	int enable=1;
 	int i,n;
 	char dialstr[512];
+	char dialstr2[500];
 	int ret;
 	const char *dialstatus;
 	int priority;
@@ -309,8 +310,8 @@ static int lcdial_exec(struct ast_channel *chan, const char *data)
 	if (unique) n=1;
 	for (i = 0;i<n;i++) {
 		ast_log(LOG_NOTICE, "LCDial: Try #%d via %s, rate=%.4f, dialstr=%s\n",i,provider[sort[i]].name,provider[sort[i]].rate,provider[sort[i]].dialstr);
-		sprintf(dialstr,provider[sort[i]].dialstr,number); //dialstr="IAX/provider/NUMBER,30,m"
-		sprintf(dialstr,"%s,%s",dialstr, args);
+		sprintf(dialstr2, provider[sort[i]].dialstr, number); //dialstr="IAX/provider/NUMBER,30,m"
+		sprintf(dialstr, "%s,%s", dialstr2, args);
 		ret = lcdial_dial(chan, dialstr);
 		// Check the return code
 		dialstatus = pbx_builtin_getvar_helper(chan, "DIALSTATUS");
