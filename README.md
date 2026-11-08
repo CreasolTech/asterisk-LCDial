@@ -24,9 +24,11 @@ lcdial.conf file, named
 
 ## LCDial: How to install it?
 
-A bash script is provided to install LCDial. You need MySQL client/server and libs, make/gcc compiler, asterisk include files or sources, ...
+Install asterisk-dev package (header files), if you're not installing asterisk from sources.
 
-Type **./install.sh** to start installing.
+You need MySQL client/server and libs, make/gcc compiler, asterisk include files or sources, ...
+
+Type **./install.sh** to compile and install LCDial, configuration file, MariaDB tables.
 
 
 ## LCDial: How to use it?
